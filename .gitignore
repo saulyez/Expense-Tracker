@@ -11,3 +11,5 @@ mail_creds.json
 
 # Ignore logs
 *.log
+# Ignore token files
+mail_token.pickle
