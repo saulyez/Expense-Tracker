@@ -31,10 +31,11 @@ class GmailHandler:
 
         return build('gmail', 'v1', credentials=creds)
 
-    def get_attachments(self, query='has:attachment', save_dir='attachments'):
+    def get_attachments(self, subject='expenses', save_dir='attachments'):
         """
         Fetch and save attachments from Gmail messages matching the query.
         """
+        query = f'subject:{subject} has:attachment'
         os.makedirs(save_dir, exist_ok=True)  # Ensure save directory exists
 
         try:

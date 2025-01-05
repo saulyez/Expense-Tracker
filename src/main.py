@@ -1,7 +1,7 @@
-from src.mailApi import GmailHandler
+from mailApi import GmailHandler
 
 
 if __name__ == '__main__':
-    gmail = GmailHandler(creds_file='../mail_creds.json')
-    gmail.get_attachments(query = 'has:attachment', save_dir = 'attachments')
+    gmail = GmailHandler(creds_file='../mail_creds.json', token_file='./mail_token.pickle')
+    gmail.get_attachments(save_dir = 'attachments')
 
