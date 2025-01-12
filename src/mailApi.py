@@ -16,19 +16,36 @@ class GmailHandler:
 
     def authenticate(self):
         creds = None
+        # Load existing credentials from the token file
         if os.path.exists(self.token_file):
             with open(self.token_file, 'rb') as token:
                 creds = pickle.load(token)
 
+        # If credentials are invalid or missing, refresh or reauthorize
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(self.creds_file, self.SCOPES)
-                creds = flow.run_local_server(port=0)
+                try:
+                    creds.refresh(Request())  # Attempt to refresh the token
+                except Exception as e:
+                    print(f"Failed to refresh token: {e}")
+                    print("Reauthorization required.")
+                    creds = None  # Force reauthorization
+            if not creds:  # If no valid credentials, trigger reauthorization
+                try:
+                    flow = InstalledAppFlow.from_client_secrets_file(
+                        self.creds_file,
+                        self.SCOPES
+                    )
+                    # Explicitly specify offline access
+                    creds = flow.run_local_server(port=0, access_type='offline')
+                except Exception as e:
+                    raise Exception(f"An error occurred during the authorization flow: {e}")
+
+            # Save the new credentials to the token file
             with open(self.token_file, 'wb') as token:
                 pickle.dump(creds, token)
 
+        # Build the Gmail API service object
         return build('gmail', 'v1', credentials=creds)
 
     def get_attachments(self, subject='expenses', save_dir='attachments'):
